@@ -1,8 +1,6 @@
 im = imread('.jpg')
 im = rgb2gray(im);
-im2 = im < 105im = imread('.jpg')
-im = rgb2gray(im);
-im2 = im < 105
+im2 = im < 105;
 im3 = imcrop(im2);
 imshow(im3);
 im4 = imresize(im3',[8 16]);
