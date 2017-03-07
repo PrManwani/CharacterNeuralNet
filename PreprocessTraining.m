@@ -1,0 +1,24 @@
+m = size(CTraining,1);
+for i = 4001:m
+    im = CTraining(i,:);
+    im2 = reshape(im,[8 16]);
+    im3 = cropletter(im2');
+    im3 = imresize(im3,[16 8]);
+    im3 = im3>0.8;
+    im3 = strokewidth(im3);
+    im3 = im3>0.5;
+    CTraining2(i,:) = reshape(im3',[128,1]);
+end
+CTrainingaf = add_features(CTraining2);
+m = size(CTest2,1);
+for i = 1001:m
+    im = CTest(i,:);
+    im2 = reshape(im,[8 16]);
+    im3 = cropletter(im2');    
+    im3 = imresize(im3,[16 8]);
+    im3 = im3>0.8;
+    im3 = strokewidth(im3);
+    im3 = im3>0.5;
+    CTest2(i,:) = reshape(im3',[128,1]);
+end
+CTestaf = add_features(CTest2);

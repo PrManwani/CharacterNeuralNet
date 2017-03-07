@@ -1,0 +1,123 @@
+function [J grad s2] = CostFunction(nn_params,input_layer_size, ...
+                                   hidden_layer1_size, ...
+                                   hidden_layer2_size, ...
+                                   num_labels,X,y,lambda, s)
+
+Theta1 = reshape(nn_params(1:hidden_layer1_size * (input_layer_size + 1)), ...
+                 hidden_layer1_size, (input_layer_size + 1));
+
+
+Theta2 = reshape(nn_params((1 + (hidden_layer1_size * (input_layer_size + 1))):((hidden_layer1_size*(input_layer_size + 1))+...
+    (hidden_layer2_size*(hidden_layer1_size + 1)))), ...
+                 hidden_layer2_size, (hidden_layer1_size + 1));
+
+Theta3 = reshape(nn_params((1+((hidden_layer1_size*(input_layer_size + 1))+...
+    (hidden_layer2_size*(hidden_layer1_size + 1)))):end), ...
+                 num_labels, (hidden_layer2_size + 1));
+
+J = 0;
+
+m = size(y,1);
+
+X = [ones(m,1) X];
+z1 = X*Theta1';
+if(s==1)
+    a1 = sigmoid(z1);    
+    h1 = [ones(m,1) a1];
+    
+    z2 = h1*Theta2';
+    a2 = sigmoid(z2);
+    
+    h2 = [ones(m,1) a2];
+    z3 = h2*Theta3';
+    
+    %h3 = softmax(z3);
+    h3 = sigmoid(z3);
+    b = zeros(m,num_labels);
+    
+    for w = 1:num_labels
+        b(:,w) = (y==w);
+    end
+    y = b;
+    
+    for i = 1:m
+        cost_for_1 = ((-y(i,:))*(log(h3(i,:))') - (1-y(i,:))*((log(1 -h3(i,:)))'));% for sigmoid
+        %cost_for_1 = (((-y(i,:)+1)/2)*((log(h3(i,:))'+1)/2) - (1-((y(i,:)+1)/2))*((log(1 - ((h3(i,:)'+1)/2)))));%
+        J = J + cost_for_1;
+    end
+    J = J/m;
+    
+    sum_reg =(lambda/(2*m))*(sum(sum((Theta1(:,(2:end))).^2)) + sum(sum((Theta2(:,(2:end))).^2))+sum(sum((Theta3(:,(2:end))).^2)));
+    J = J + sum_reg;
+    
+    %Backpropagation
+    delta_4 = h3 - y;
+    
+    delta_3 = (delta_4*Theta3).*(sigmoidGradient([ones(size(z2,1), 1) z2]));
+    %delta_3 = (delta_4*Theta3).*(hyperbolicGradient([ones(size(z2,1), 1) z2]));
+    
+    delta_3 = delta_3(:,2:end);
+    
+    delta_2 = (delta_3*Theta2).*(sigmoidGradient([ones(size(z1,1), 1) z1]));
+    %delta_2 = (delta_3*Theta2).*(hyperbolicGradient([ones(size(z1,1), 1) z1]));
+    
+    delta_2 = delta_2(:,2:end);
+    
+elseif(s==2)
+    %a1 = sigmoid(z1);
+    a1 = tanh(z1);
+    
+    h1 = [ones(m,1) a1];
+    z2 = h1*Theta2';
+    %a2 = sigmoid(z2);
+    a2 = tanh(z2);
+    
+    h2 = [ones(m,1) a2];
+    z3 = h2*Theta3';
+    %h3 = softmax(z3);
+    %h3 = tanh(z3);
+    h3 = sigmoid(z3);
+    b = zeros(m,num_labels);
+    
+    for w = 1:num_labels
+        b(:,w) = (y==w);
+    end
+    y = b;
+    
+    for i = 1:m
+        cost_for_1 = ((-y(i,:))*(log(h3(i,:))') - (1-y(i,:))*((log(1 -h3(i,:)))'));% for sigmoid
+        %cost_for_1 = (((-y(i,:)+1)/2)*((log(h3(i,:))'+1)/2) - (1-((y(i,:)+1)/2))*((log(1 - ((h3(i,:)'+1)/2)))));%
+        J = J + cost_for_1;
+    end
+    J = J/m;
+    
+    sum_reg =(lambda/(2*m))*(sum(sum((Theta1(:,(2:end))).^2)) + sum(sum((Theta2(:,(2:end))).^2))+sum(sum((Theta3(:,(2:end))).^2)));
+    J = J + sum_reg;
+    
+    %Backpropagation
+    delta_4 = h3 - y;
+    
+    %delta_3 = (delta_4*Theta3).*(sigmoidGradient([ones(size(z2,1), 1) z2]));
+    delta_3 = (delta_4*Theta3).*(hyperbolicGradient([ones(size(z2,1), 1) z2]));
+    
+    delta_3 = delta_3(:,2:end);
+    
+    %delta_2 = (delta_3*Theta2).*(sigmoidGradient([ones(size(z1,1), 1) z1]));
+    delta_2 = (delta_3*Theta2).*(hyperbolicGradient([ones(size(z1,1), 1) z1]));
+    
+    delta_2 = delta_2(:,2:end);
+    
+end
+s1 = delta_2'*(X);
+
+s2 = delta_3'*(h1);
+
+s3 = delta_4'*(h2);
+
+Theta1_grad = (s1/m) + (lambda / m) * [zeros(size(Theta1,1),1) Theta1(:,2:end)];
+Theta2_grad = (s2/m)+ (lambda / m)* [zeros(size(Theta2,1),1) Theta2(:,2:end)];
+Theta3_grad = (s3/m)+ (lambda / m)* [zeros(size(Theta3,1),1) Theta3(:,2:end)];
+
+grad = [Theta1_grad(:) ; Theta2_grad(:); Theta3_grad(:)];
+end
+       

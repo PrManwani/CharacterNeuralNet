@@ -1,0 +1,85 @@
+function [x,remain,count,covered] = singleletterwisecrop(im,count,covered)
+%UNTITLED4 Summary of this function goes here
+%   Detailed explanation goes here
+imshow(im);
+m1 = size(im,1);
+m2 = size(im,2);
+s1 = 0;
+xmax = 0;
+xmin = 0;
+i = 0;
+flag =0;
+% while((xmax==0 || xmin ==0) && i<m2)
+%     i= i+1;
+%     covered = covered+1
+%     s1 =  sum(im2(:,i));                
+%     if(s1>5 && flag ==0)
+%         xmin = i;
+%         flag=1;
+%     end    
+%     if(s1==0 && flag==1)
+%         xmax = i;
+%     end
+% end
+% im3 = imcrop(im2,[xmin 0 (xmax-xmin) m1]);
+% i = 0;
+% flag =0;
+% ymin = 0;
+% ymax =0;
+% while((((ymax-ymin)<10)|| ymin ==0) && i<m1)
+%     i= i+1;
+%     s1 =  sum(im3(i,:));
+%     if(s1>0 && flag ==0)
+%         ymin = i;
+%         flag=1;
+%     end    
+%     if(s1==0 && flag==1)
+%         ymax = i;
+%     end
+% end
+while((xmax ==0 || xmin ==0) && i<m2)
+    i= i+1;
+    covered = covered + 1
+    s1 =  sum(im(:,i));                
+    if(s1>0 && flag ==0)
+        xmin = i;
+        flag=1;
+    end    
+    if(s1==0 && flag==1)
+        xmax = i;
+    end
+    if(i == m2)
+        xmax = i;
+    end        
+end
+im2 = imcrop(im,[xmin 0 (xmax-xmin) m1]);
+i = 0;
+flag =0;
+ymin = 0;
+ymax =0;
+a =0;
+b=0;
+while(i<m1 && flag<2)
+    i= i+1;
+    s1 =  sum(im2(i,:));
+    if(s1>0 && a==0)
+        ymin = i;
+        a=1;
+    end
+    s2 = sum(im2(m1+1-i,:));
+    if(s2>0 && b==0)
+        ymax = m1+1-i;
+        b=1;
+    end
+    if(i==m1)
+        ymax = i;
+    end
+    flag = a+b;
+end
+im4 = imcrop(im,[xmin ymin (xmax-xmin) (ymax-ymin)]);
+remain = imcrop(im,[xmax 0 m2 m1]);
+im4 = imresize(im4',[8 16]);
+im4 = strokewidth(im4);
+imshow(im4');
+x = reshape(im4, [128,1]);
+x = add_features(x');
