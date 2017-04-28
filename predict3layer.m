@@ -23,6 +23,12 @@ h1 = tanh([ones(m, 1) X] * Theta1');
 h2 = tanh([ones(m, 1) h1] * Theta2');
 h3 = sigmoid([ones(m, 1) h2] * Theta3');
 %h3 = tanh([ones(m, 1) h2] * Theta3');
+elseif(s==3)
+h1 = ([ones(m, 1) X] * Theta1').*(([ones(m, 1) X] * Theta1')>0);
+%h2 = sigmoid([ones(m, 1) h1] * Theta2');
+h2 = ([ones(m, 1) h1] * Theta2').*(([ones(m, 1) h1] * Theta2')>0);
+h3 = sigmoid([ones(m, 1) h2] * Theta3');
+%h3 = tanh([ones(m, 1) h2] * Theta3');    
 end
 [~, p] = max(h3, [], 2);
 % s = sum(h3);
